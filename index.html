@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>班级荣誉积分管理平台</title>
+    <style>
+        /* 全局样式重置与基础配置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+        }
+        body {
+            background-color: #f9fafb;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        /* 头部导航样式 */
+        .header {
+            background: #2563eb;
+            color: #ffffff;
+            padding: 1.2rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .nav a {
+            color: #ffffff;
+            text-decoration: none;
+            margin-left: 1.8rem;
+            font-size: 0.95rem;
+            transition: opacity 0.3s;
+        }
+        .nav a:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+        .user-info {
+            color: #ffffff;
+            margin-left: 1.8rem;
+        }
+        .logout-btn {
+            color: #ffffff;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: 0.95rem;
+            margin-left: 0.5rem;
+        }
+
+        /* 容器样式 */
+        .container {
+            max-width: 1200px;
+            margin: 2.5rem auto;
+            padding: 0 2rem;
+        }
+
+        /* 加载提示样式 */
+        .loading {
+            padding: 3rem;
+            text-align: center;
+            color: #64748b;
+            font-size: 1.1rem;
+            margin-top: 2rem;
+        }
+
+        /* 功能列表样式 */
+        .function-title {
+            color: #2563eb;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 0.6rem;
+        }
+        .function-list {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 2rem;
+        }
+        .function-list li {
+            background: #ffffff;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+            transition: box-shadow 0.3s;
+        }
+        .function-list li:hover {
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        .function-list a {
+            color: #1e293b;
+            text-decoration: none;
+        }
+        /* 子功能样式（系统工具下拉） */
+        .sub-function {
+            display: inline-block;
+            margin-left: 1rem;
+        }
+        .sub-function li {
+            display: inline-block;
+            margin-left: 0.8rem;
+        }
+
+        /* 积分排行榜样式 */
+        #score-board {
+            background: #ffffff;
+            border-radius: 6px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            margin-bottom: 2rem;
+        }
+        .board-title {
+            color: #2563eb;
+            font-size: 1.2rem;
+            margin-bottom: 1.2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .score-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .score-table th, .score-table td {
+            border: 1px solid #e2e8f0;
+            padding: 1rem;
+            text-align: center;
+        }
+        .score-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #475569;
+        }
+        .score-table tr:nth-child(even) {
+            background: #f8fafc;
+        }
+        .action-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+        .edit-btn {
+            background: #3b82f6;
+            color: white;
+            margin-right: 0.5rem;
+        }
+        .edit-btn:hover {
+            background: #2563eb;
+        }
+
+        /* 登录表单样式 */
+        .login-container {
+            max-width: 400px;
+            margin: 5rem auto;
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .login-title {
+            text-align: center;
+            color: #2563eb;
+            margin-bottom: 1.5rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #475569;
+        }
+        .form-control {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        .btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .error-message {
+            color: #ef4444;
+            text-align: center;
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            background: #fee2e2;
+            border-radius: 4px;
+        }
+
+        /* 编辑积分模态框 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 500px;
+        }
+        .modal-title {
+            margin-bottom: 1.5rem;
+            color: #2563eb;
+        }
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        .cancel-btn {
+            background: #94a3b8;
+        }
+        .cancel-btn:hover {
+            background: #64748b;
+        }
+
+        /* 隐藏元素 */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 登录页面 -->
+    <div id="login-page" class="login-container">
+        <h2 class="login-title">管理员登录</h2>
+        <div id="login-error" class="error-message hidden"></div>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn">登录</button>
+        </form>
+    </div>
+
+    <!-- 主页面（默认隐藏） -->
+    <div id="main-page" class="hidden">
+        <!-- 头部导航栏 -->
+        <div class="header">
+            <h1>班级荣誉积分榜（竞赛模式）</h1>
+            <div class="nav">
+                <span class="user-info" id="user-info"></span>
+                <button class="logout-btn" id="logout-btn">退出登录</button>
+                <a href="#" id="back-home">返回主页</a>
+                <a href="#" id="admin-center">管理员中心</a>
+            </div>
+        </div>
+
+        <!-- 核心功能列表 -->
+        <div class="container">
+            <h3 class="function-title">班级荣誉积分管理平台 - 主要功能</h3>
+            <ul class="function-list">
+                <li><a href="#" id="go-home">主页</a></li>
+                <li><a href="#" id="data-board">数据看板</a></li>
+                <li><a href="#" id="admin-link">管理员中心</a></li>
+                <li><a href="#" id="student-query">学生积分查询</a></li>
+                <li>
+                    <a href="javascript:;" id="sys-tools">系统工具 ▼</a>
+                    <ul class="function-list sub-function" id="sub-tools" style="display: none;">
+                        <li><a href="#" id="account-test">账号测试</a></li>
+                        <li><a href="#" id="score-test">积分统计测试</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <!-- 数据加载提示 -->
+            <div class="loading" id="loading">
+                连接中... 正在更新积分数据...
+            </div>
+
+            <!-- 积分排行榜表格 -->
+            <div id="score-board">
+                <div class="board-title">
+                    <span>班级荣誉积分排行榜</span>
+                </div>
+                <table class="score-table">
+                    <thead>
+                        <tr>
+                            <th>排名</th>
+                            <th>班级</th>
+                            <th>总积分</th>
+                            <th>竞赛得分</th>
+                            <th>更新时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="score-table-body">
+                        <!-- 后端数据将动态插入此处 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 编辑积分模态框 -->
+    <div class="modal" id="edit-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">编辑班级积分</h3>
+            <form id="edit-form">
+                <input type="hidden" id="edit-class-id">
+                <div class="form-group">
+                    <label for="edit-class-name">班级名称</label>
+                    <input type="text" id="edit-class-name" class="form-control" readonly>
+                </div>
+                <div class="form-group">
+                    <label for="edit-total-score">总积分</label>
+                    <input type="number" id="edit-total-score" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-competition-score">竞赛得分</label>
+                    <input type="number" id="edit-competition-score" class="form-control" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn cancel-btn" id="cancel-edit">取消</button>
+                    <button type="submit" class="btn">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM元素
+        const loginPage = document.getElementById('login-page');
+        const mainPage = document.getElementById('main-page');
+        const loginForm = document.getElementById('login-form');
+        const loginError = document.getElementById('login-error');
+        const userInfo = document.getElementById('user-info');
+        const logoutBtn = document.getElementById('logout-btn');
+        const loading = document.getElementById('loading');
+        const scoreTableBody = document.getElementById('score-table-body');
+        const editModal = document.getElementById('edit-modal');
+        const editForm = document.getElementById('edit-form');
+        const cancelEdit = document.getElementById('cancel-edit');
+        const sysTools = document.getElementById('sys-tools');
+        const subTools = document.getElementById('sub-tools');
+
+        // 页面加载时检查登录状态
+        window.onload = async function() {
+            const token = localStorage.getItem('token');
+            if (token) {
+                // 验证token有效性
+                try {
+                    const response = await fetch('/api/verify-token', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        // 登录有效，显示主页面
+                        showMainPage(data.username);
+                    } else {
+                        // Token无效或过期，清除并显示登录页
+                        localStorage.removeItem('token');
+                        showLoginPage();
+                    }
+                } catch (error) {
+                    console.error('验证登录状态失败:', error);
+                    showLoginPage();
+                }
+            } else {
+                // 未登录，显示登录页
+                showLoginPage();
+            }
+        };
+
+        // 显示登录页面
+        function showLoginPage() {
+            loginPage.classList.remove('hidden');
+            mainPage.classList.add('hidden');
+        }
+
+        // 显示主页面
+        function showMainPage(username) {
+            userInfo.textContent = `欢迎，${username}`;
+            loginPage.classList.add('hidden');
+            mainPage.classList.remove('hidden');
+            loadScoreData();
+        }
+
+        // 登录表单提交
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // 登录成功，保存token
+                    localStorage.setItem('token', data.token);
+                    showMainPage(username);
+                    // 重置表单
+                    loginForm.reset();
+                    loginError.classList.add('hidden');
+                } else {
+                    // 登录失败，显示错误信息
+                    loginError.textContent = data.message || '登录失败，请检查用户名和密码';
+                    loginError.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('登录请求失败:', error);
+                loginError.textContent = '网络错误，请稍后重试';
+                loginError.classList.remove('hidden');
+            }
+        });
+
+        // 退出登录
+        logoutBtn.addEventListener('click', function() {
+            localStorage.removeItem('token');
+            showLoginPage();
+        });
+
+        // 加载积分数据
+        async function loadScoreData() {
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch('/api/score-data', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const scoreData = await response.json();
+                    renderScoreBoard(scoreData);
+                    loading.style.display = 'none';
+                } else if (response.status === 401) {
+                    // 未授权，需要重新登录
+                    localStorage.removeItem('token');
+                    showLoginPage();
+                } else {
+                    loading.textContent = '数据加载失败，请刷新页面重试';
+                }
+            } catch (error) {
+                console.error('加载积分数据失败:', error);
+                loading.textContent = '网络错误，无法连接服务器';
+            }
+        }
+
+        // 渲染积分排行榜
+        function renderScoreBoard(data) {
+            scoreTableBody.innerHTML = '';
+            
+            data.forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.className}</td>
+                    <td>${item.totalScore}</td>
+                    <td>${item.competitionScore}</td>
+                    <td>${item.updateTime}</td>
+                    <td>
+                        <button class="action-btn edit-btn" data-id="${item.id}" 
+                            data-class="${item.className}" 
+                            data-total="${item.totalScore}" 
+                            data-competition="${item.competitionScore}">
+                            编辑
+                        </button>
+                    </td>
+                `;
+                scoreTableBody.appendChild(row);
+            });
+
+            // 为编辑按钮添加事件监听
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.addEventListener('click', openEditModal);
+            });
+        }
+
+        // 打开编辑模态框
+        function openEditModal() {
+            const id = this.getAttribute('data-id');
+            const className = this.getAttribute('data-class');
+            const totalScore = this.getAttribute('data-total');
+            const competitionScore = this.getAttribute('data-competition');
+
+            document.getElementById('edit-class-id').value = id;
+            document.getElementById('edit-class-name').value = className;
+            document.getElementById('edit-total-score').value = totalScore;
+            document.getElementById('edit-competition-score').value = competitionScore;
+
+            editModal.style.display = 'flex';
+        }
+
+        // 关闭编辑模态框
+        cancelEdit.addEventListener('click', function() {
+            editModal.style.display = 'none';
+        });
+
+        // 编辑表单提交
+        editForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const id = document.getElementById('edit-class-id').value;
+            const totalScore = document.getElementById('edit-total-score').value;
+            const competitionScore = document.getElementById('edit-competition-score').value;
+
+            try {
+                const token = localStorage.getItem('token');
+                const response = await fetch(`/api/score-data/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        totalScore,
+                        competitionScore,
+                        updateTime: new Date().toLocaleString()
+                    })
+                });
+
+                if (response.ok) {
+                    // 更新成功，重新加载数据
+                    editModal.style.display = 'none';
+                    loadScoreData();
+                } else if (response.status === 401) {
+                    // 未授权，需要重新登录
+                    localStorage.removeItem('token');
+                    showLoginPage();
+                } else {
+                    const data = await response.json();
+                    alert(data.message || '更新失败，请重试');
+                }
+            } catch (error) {
+                console.error('更新积分失败:', error);
+                alert('网络错误，无法更新数据');
+            }
+        });
+
+        // 系统工具展开/收起
+        sysTools.addEventListener('click', function() {
+            subTools.style.display = subTools.style.display === 'none' || subTools.style.display === '' ? 'inline-block' : 'none';
+        });
+
+        // 其他功能按钮
+        document.getElementById('back-home').addEventListener('click', (e) => {
+            e.preventDefault();
+            loadScoreData();
+        });
+        document.getElementById('go-home').addEventListener('click', (e) => {
+            e.preventDefault();
+            loadScoreData();
+        });
+        document.getElementById('admin-center').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('管理员中心功能');
+        });
+        document.getElementById('admin-link').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('管理员中心功能');
+        });
+        document.getElementById('data-board').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('数据看板功能');
+        });
+        document.getElementById('student-query').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('学生积分查询功能');
+        });
+        document.getElementById('account-test').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('账号测试功能');
+        });
+        document.getElementById('score-test').addEventListener('click', (e) => {
+            e.preventDefault();
+            alert('积分统计测试功能');
+        });
+    </script>
+</body>
+</html>
